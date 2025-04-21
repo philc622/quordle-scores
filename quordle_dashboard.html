@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quordle Scores Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/date-fns.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #4b3f72;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            margin: 0;
+        }
+        .file-input {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .chart-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-card {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4b3f72;
+            margin: 10px 0;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .data-table th {
+            background-color: #4b3f72;
+            color: white;
+        }
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .data-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        #lineChartContainer, #barChartContainer, #radarChartContainer {
+            position: relative;
+            height: 400px;
+        }
+        .instructions {
+            background: #e9f7fe;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .button {
+            background-color: #4b3f72;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #352b50;
+        }
+        #loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #4b3f72;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .chart-row {
+                flex-direction: column;
+            }
+            .chart-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Quordle Scores Visualization</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="instructions">
+            <h3>How to use this dashboard:</h3>
+            <p>1. Click "Choose File" and select your quordle_scores.csv file</p>
+            <p>2. The dashboard will automatically generate visualizations of your Quordle performance</p>
+            <p>3. Use the filter options to analyze specific time periods or score ranges</p>
+        </div>
+
+        <div class="file-input">
+            <h2>Upload Your Data</h2>
+            <input type="file" id="csvFile" accept=".csv" />
+            <button id="loadSampleData" class="button">Load Sample Data</button>
+            <div id="loader">
+                <div class="spinner"></div>
+                <p>Loading your data...</p>
+            </div>
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Games Analyzed</h3>
+                    <div id="totalGames" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Sum</h3>
+                    <div id="avgSum" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Best Game</h3>
+                    <div id="bestGame" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Perfect Scores</h3>
+                    <div id="perfectScores" class="stat-value">0</div>
+                </div>
+            </div>
+
+            <div class="chart-row">
+                <div class="chart-card">
+                    <h2>Score Trends Over Time</h2>
+                    <div id="lineChartContainer">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h2>Score Distribution</h2>
+                    <div id="barChartContainer">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-row">
+                <div class="chart-card">
+                    <h2>Individual Word Performance</h2>
+                    <div id="radarChartContainer">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h2>Recent Performance</h2>
+                    <div id="recentChartContainer">
+                        <canvas id="recentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>Your Quordle Data</h2>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table id="dataTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Score 1</th>
+                                <th>Score 2</th>
+                                <th>Score 3</th>
+                                <th>Score 4</th>
+                                <th>Sum</th>
+                                <th>Max</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lineChart, barChart, radarChart, recentChart;
+        let allData = [];
+
+        // Sample data for demonstration
+        const sampleData = [
+            { "Date": "2025-04-18", "Score 1": 4, "Score 2": 5, "Score 3": 4, "Score 4": 6, "Sum": 19, "Max": 6 },
+            { "Date": "2025-04-17", "Score 1": 5, "Score 2": 6, "Score 3": 5, "Score 4": 9, "Sum": 25, "Max": 9 },
+            { "Date": "2025-04-16", "Score 1": 3, "Score 2": 4, "Score 3": 5, "Score 4": 4, "Sum": 16, "Max": 5 },
+            { "Date": "2025-04-15", "Score 1": 4, "Score 2": 7, "Score 3": 4, "Score 4": 5, "Sum": 20, "Max": 7 },
+            { "Date": "2025-04-14", "Score 1": 6, "Score 2": 5, "Score 3": 6, "Score 4": 7, "Sum": 24, "Max": 7 },
+            { "Date": "2025-04-13", "Score 1": 3, "Score 2": 3, "Score 3": 4, "Score 4": 5, "Sum": 15, "Max": 5 },
+            { "Date": "2025-04-12", "Score 1": 5, "Score 2": 4, "Score 3": 6, "Score 4": 5, "Sum": 20, "Max": 6 },
+            { "Date": "2025-04-11", "Score 1": 4, "Score 2": 4, "Score 3": 7, "Score 4": 8, "Sum": 23, "Max": 8 },
+            { "Date": "2025-04-10", "Score 1": 4, "Score 2": 5, "Score 3": 5, "Score 4": 6, "Sum": 20, "Max": 6 },
+            { "Date": "2025-04-09", "Score 1": 3, "Score 2": 4, "Score 3": 3, "Score 4": 5, "Sum": 15, "Max": 5 },
+            { "Date": "2025-04-08", "Score 1": 5, "Score 2": 6, "Score 3": 7, "Score 4": 6, "Sum": 24, "Max": 7 },
+            { "Date": "2025-04-07", "Score 1": 4, "Score 2": 5, "Score 3": 3, "Score 4": 4, "Sum": 16, "Max": 5 },
+            { "Date": "2025-04-06", "Score 1": 6, "Score 2": 7, "Score 3": 5, "Score 4": 8, "Sum": 26, "Max": 8 },
+            { "Date": "2025-04-05", "Score 1": 4, "Score 2": 4, "Score 3": 6, "Score 4": 5, "Sum": 19, "Max": 6 }
+        ];
+
+        // Event listeners
+        document.getElementById('csvFile').addEventListener('change', handleFileSelect);
+        document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('loader').style.display = 'block';
+                parseCSV(file);
+            }
+        }
+
+        function loadSampleData() {
+            document.getElementById('loader').style.display = 'block';
+            
+            // Simulate loading delay for better UX
+            setTimeout(() => {
+                processData(sampleData);
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            }, 500);
+        }
+
+        function parseCSV(file) {
+            Papa.parse(file, {
+                header: true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 0) {
+                        // Remove any rows that don't have complete data
+                        const validData = results.data.filter(row => 
+                            row.Date && row['Score 1'] !== undefined && 
+                            row['Score 2'] !== undefined && row['Score 3'] !== undefined && 
+                            row['Score 4'] !== undefined);
+                        
+                        // Calculate Sum and Max if they don't exist
+                        validData.forEach(row => {
+                            if (row.Sum === undefined) {
+                                row.Sum = row['Score 1'] + row['Score 2'] + row['Score 3'] + row['Score 4'];
+                            }
+                            if (row.Max === undefined) {
+                                row.Max = Math.max(row['Score 1'], row['Score 2'], row['Score 3'], row['Score 4']);
+                            }
+                        });
+                        
+                        processData(validData);
+                    } else {
+                        alert('No valid data found in the CSV file');
+                    }
+                    document.getElementById('loader').style.display = 'none';
+                },
+                error: function(error) {
+                    console.error('Error parsing CSV:', error);
+                    alert('Error parsing the CSV file. Please check the format.');
+                    document.getElementById('loader').style.display = 'none';
+                }
+            });
+        }
+
+        function processData(data) {
+            allData = data;
+            
+            // Sort data by date (oldest to newest)
+            allData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            
+            updateStatistics();
+            populateTable();
+            createCharts();
+            
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function updateStatistics() {
+            const totalGames = allData.length;
+            
+            // Calculate average sum
+            const totalSum = allData.reduce((sum, row) => sum + row.Sum, 0);
+            const avgSum = totalGames > 0 ? (totalSum / totalGames).toFixed(1) : 0;
+            
+            // Find best game (lowest sum)
+            let bestSum = Number.MAX_VALUE;
+            allData.forEach(row => {
+                if (row.Sum < bestSum) bestSum = row.Sum;
+            });
+            
+            // Count perfect scores (all 4s or better)
+            const perfectCount = allData.filter(row => 
+                row['Score 1'] <= 4 && row['Score 2'] <= 4 && 
+                row['Score 3'] <= 4 && row['Score 4'] <= 4
+            ).length;
+
+            // Update statistic displays
+            document.getElementById('totalGames').textContent = totalGames;
+            document.getElementById('avgSum').textContent = avgSum;
+            document.getElementById('bestGame').textContent = bestSum === Number.MAX_VALUE ? '0' : bestSum;
+            document.getElementById('perfectScores').textContent = perfectCount;
+        }
+
+        function populateTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            // Add the most recent 20 rows (or all if less than 20)
+            const recentData = [...allData].reverse().slice(0, 20);
+            
+            recentData.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Format the date nicely
+                const dateCell = document.createElement('td');
+                const dateObj = new Date(row.Date);
+                const formattedDate = isNaN(dateObj.getTime()) ? row.Date : 
+                    dateObj.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                dateCell.textContent = formattedDate;
+                tr.appendChild(dateCell);
+                
+                // Add score cells
+                const cells = ['Score 1', 'Score 2', 'Score 3', 'Score 4', 'Sum', 'Max'];
+                cells.forEach(key => {
+                    const td = document.createElement('td');
+                    td.textContent = row[key];
+                    tr.appendChild(td);
+                });
+                
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function createCharts() {
+            createLineChart();
+            createBarChart();
+            createRadarChart();
+            createRecentChart();
+        }
+
+        function createLineChart() {
+            // Prepare data for line chart
+            const dates = allData.map(row => row.Date);
+            const sums = allData.map(row => row.Sum);
+            
+            // Calculate moving average (7-day)
+            const movingAvg = [];
+            const windowSize = Math.min(7, allData.length);
+            
+            for (let i = 0; i < sums.length; i++) {
+                if (i < windowSize - 1) {
+                    // Not enough data points yet for full window
+                    movingAvg.push(null);
+                } else {
+                    // Calculate average of window
+                    let sum = 0;
+                    for (let j = 0; j < windowSize; j++) {
+                        sum += sums[i - j];
+                    }
+                    movingAvg.push(sum / windowSize);
+                }
+            }
+
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            
+            if (lineChart) {
+                lineChart.destroy();
+            }
+            
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Sum of Scores',
+                            data: sums,
+                            borderColor: 'rgba(75, 63, 114, 1)',
+                            backgroundColor: 'rgba(75, 63, 114, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: '7-Day Moving Average',
+                            data: movingAvg,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: Math.max(0, Math.min(...sums) - 2),
+                            max: Math.max(...sums) + 2,
+                            title: {
+                                display: true,
+                                text: 'Sum of Scores'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 10,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const dateStr = tooltipItems[0].label;
+                                    const date = new Date(dateStr);
+                                    return isNaN(date.getTime()) ? dateStr : 
+                                        date.toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createBarChart() {
+            // Prepare score distribution data
+            const scoreFrequency = {
+                "Score 1": Array(14).fill(0),
+                "Score 2": Array(14).fill(0),
+                "Score 3": Array(14).fill(0),
+                "Score 4": Array(14).fill(0)
+            };
+            
+            allData.forEach(row => {
+                scoreFrequency["Score 1"][row["Score 1"]]++;
+                scoreFrequency["Score 2"][row["Score 2"]]++;
+                scoreFrequency["Score 3"][row["Score 3"]]++;
+                scoreFrequency["Score 4"][row["Score 4"]]++;
+            });
+            
+            const labels = Array.from({length: 14}, (_, i) => i);
+            
+            const ctx = document.getElementById('barChart').getContext('2d');
+            
+            if (barChart) {
+                barChart.destroy();
+            }
+            
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Word 1',
+                            data: scoreFrequency["Score 1"],
+                            backgroundColor: 'rgba(75, 63, 114, 0.7)'
+                        },
+                        {
+                            label: 'Word 2',
+                            data: scoreFrequency["Score 2"],
+                            backgroundColor: 'rgba(66, 133, 244, 0.7)'
+                        },
+                        {
+                            label: 'Word 3',
+                            data: scoreFrequency["Score 3"],
+                            backgroundColor: 'rgba(219, 68, 55, 0.7)'
+                        },
+                        {
+                            label: 'Word 4',
+                            data: scoreFrequency["Score 4"],
+                            backgroundColor: 'rgba(15, 157, 88, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Frequency'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Score Value'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return `Score: ${tooltipItems[0].label}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRadarChart() {
+            // Calculate average scores for each position
+            let totalScores = [0, 0, 0, 0];
+            
+            allData.forEach(row => {
+                totalScores[0] += row["Score 1"];
+                totalScores[1] += row["Score 2"];
+                totalScores[2] += row["Score 3"];
+                totalScores[3] += row["Score 4"];
+            });
+            
+            const avgScores = totalScores.map(score => allData.length > 0 ? score / allData.length : 0);
+            
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            if (radarChart) {
+                radarChart.destroy();
+            }
+            
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Word 1', 'Word 2', 'Word 3', 'Word 4'],
+                    datasets: [
+                        {
+                            label: 'Average Score',
+                            data: avgScores,
+                            backgroundColor: 'rgba(75, 63, 114, 0.2)',
+                            borderColor: 'rgba(75, 63, 114, 1)',
+                            pointBackgroundColor: 'rgba(75, 63, 114, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(75, 63, 114, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRecentChart() {
+            // Get the 10 most recent games
+            const recentData = [...allData].slice(-10);
+            const dates = recentData.map(row => row.Date);
+            
+            const dataset1 = recentData.map(row => row["Score 1"]);
+            const dataset2 = recentData.map(row => row["Score 2"]);
+            const dataset3 = recentData.map(row => row["Score 3"]);
+            const dataset4 = recentData.map(row => row["Score 4"]);
+            
+            const ctx = document.getElementById('recentChart').getContext('2d');
+            
+            if (recentChart) {
+                recentChart.destroy();
+            }
+            
+            recentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Word 1',
+                            data: dataset1,
+                            borderColor: 'rgba(75, 63, 114, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Word 2',
+                            data: dataset2,
+                            borderColor: 'rgba(66, 133, 244, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Word 3',
+                            data: dataset3,
+                            borderColor: 'rgba(219, 68, 55, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Word 4',
+                            data: dataset4,
+                            borderColor: 'rgba(15, 157, 88, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 0,
+                            max: 13,
+                            title: {
+                                display: true,
+                                text: 'Individual Scores'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 10,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const dateStr = tooltipItems[0].label;
+                                    const date = new Date(dateStr);
+                                    return isNaN(date.getTime()) ? dateStr : 
+                                        date.toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
