@@ -30,7 +30,7 @@
         h1 {
             margin: 0;
         }
-        .file-input {
+        .status-container {
             background: white;
             border-radius: 8px;
             padding: 20px;
@@ -130,7 +130,6 @@
             background-color: #352b50;
         }
         #loader {
-            display: none;
             text-align: center;
             padding: 20px;
         }
@@ -146,6 +145,14 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
         }
         @media (max-width: 768px) {
             .chart-row {
@@ -166,20 +173,16 @@
 
     <div class="container">
         <div class="instructions">
-            <h3>How to use this dashboard:</h3>
-            <p>1. Click "Choose File" and select your quordle_scores.csv file</p>
-            <p>2. The dashboard will automatically generate visualizations of your Quordle performance</p>
-            <p>3. Use the filter options to analyze specific time periods or score ranges</p>
+            <h3>About this dashboard:</h3>
+            <p>This dashboard automatically loads and visualizes your Quordle data from "quordle_scores.csv" in the same folder as this HTML file.</p>
         </div>
 
-        <div class="file-input">
-            <h2>Upload Your Data</h2>
-            <input type="file" id="csvFile" accept=".csv" />
-            <button id="loadSampleData" class="button">Load Sample Data</button>
+        <div class="status-container">
+            <div id="status-message">Loading your Quordle scores...</div>
             <div id="loader">
                 <div class="spinner"></div>
-                <p>Loading your data...</p>
             </div>
+            <button id="loadSampleData" class="button">Use Sample Data Instead</button>
         </div>
 
         <div id="dashboard" style="display: none;">
@@ -278,63 +281,97 @@
             { "Date": "2025-04-05", "Score 1": 4, "Score 2": 4, "Score 3": 6, "Score 4": 5, "Sum": 19, "Max": 6 }
         ];
 
-        // Event listeners
-        document.getElementById('csvFile').addEventListener('change', handleFileSelect);
+        // Event listener for sample data
         document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
 
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById('loader').style.display = 'block';
-                parseCSV(file);
-            }
+        // Load CSV file automatically when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuordleScoresFile();
+        });
+
+        function loadQuordleScoresFile() {
+            // Define the path to the CSV file
+            const csvFilePath = 'quordle_scores.csv';
+            
+            // Set up fetch request
+            fetch(csvFilePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to load file: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    // Parse the CSV text
+                    Papa.parse(csvText, {
+                        header: true,
+                        dynamicTyping: true,
+                        complete: function(results) {
+                            if (results.data && results.data.length > 0) {
+                                // Remove any rows that don't have complete data
+                                const validData = results.data.filter(row => 
+                                    row.Date && row['Score 1'] !== undefined && 
+                                    row['Score 2'] !== undefined && row['Score 3'] !== undefined && 
+                                    row['Score 4'] !== undefined);
+
+                                // Calculate Sum and Max if they don't exist
+                                validData.forEach(row => {
+                                    if (row.Sum === undefined) {
+                                        row.Sum = row['Score 1'] + row['Score 2'] + row['Score 3'] + row['Score 4'];
+                                    }
+                                    if (row.Max === undefined) {
+                                        row.Max = Math.max(row['Score 1'], row['Score 2'], row['Score 3'], row['Score 4']);
+                                    }
+                                });
+                                
+                                // Update status message
+                                document.getElementById('status-message').textContent = `Successfully loaded ${validData.length} Quordle scores!`;
+                                document.getElementById('loader').style.display = 'none';
+                                
+                                // Process the data
+                                processData(validData);
+                            } else {
+                                showError('No valid data found in the CSV file');
+                            }
+                        },
+                        error: function(error) {
+                            console.error('Error parsing CSV:', error);
+                            showError('Error parsing the CSV file. Please check the format.');
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading CSV file:', error);
+                    showError(`Couldn't load quordle_scores.csv: ${error.message}`);
+                });
+        }
+
+        function showError(message) {
+            const statusContainer = document.querySelector('.status-container');
+            document.getElementById('loader').style.display = 'none';
+            
+            // Create error message element
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // Update status message
+            document.getElementById('status-message').textContent = 'Error loading data';
+            
+            // Add error message to container
+            statusContainer.insertBefore(errorDiv, document.getElementById('loadSampleData'));
         }
 
         function loadSampleData() {
-            document.getElementById('loader').style.display = 'block';
+            document.getElementById('status-message').textContent = 'Using sample data';
+            document.getElementById('loader').style.display = 'none';
             
-            // Simulate loading delay for better UX
-            setTimeout(() => {
-                processData(sampleData);
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-            }, 500);
-        }
-
-        function parseCSV(file) {
-            Papa.parse(file, {
-                header: true,
-                dynamicTyping: true,
-                complete: function(results) {
-                    if (results.data && results.data.length > 0) {
-                        // Remove any rows that don't have complete data
-                        const validData = results.data.filter(row => 
-                            row.Date && row['Score 1'] !== undefined && 
-                            row['Score 2'] !== undefined && row['Score 3'] !== undefined && 
-                            row['Score 4'] !== undefined);
-                        
-                        // Calculate Sum and Max if they don't exist
-                        validData.forEach(row => {
-                            if (row.Sum === undefined) {
-                                row.Sum = row['Score 1'] + row['Score 2'] + row['Score 3'] + row['Score 4'];
-                            }
-                            if (row.Max === undefined) {
-                                row.Max = Math.max(row['Score 1'], row['Score 2'], row['Score 3'], row['Score 4']);
-                            }
-                        });
-                        
-                        processData(validData);
-                    } else {
-                        alert('No valid data found in the CSV file');
-                    }
-                    document.getElementById('loader').style.display = 'none';
-                },
-                error: function(error) {
-                    console.error('Error parsing CSV:', error);
-                    alert('Error parsing the CSV file. Please check the format.');
-                    document.getElementById('loader').style.display = 'none';
-                }
-            });
+            // Remove any error messages
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(el => el.remove());
+            
+            // Process the sample data
+            processData(sampleData);
         }
 
         function processData(data) {
