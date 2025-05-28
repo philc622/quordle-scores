@@ -29,10 +29,15 @@ def create_database():
     conn.commit()
     return conn, cursor
 
-def read_sent_emails(username, password=None, recipient='quordleleaderboard@gmail.com', imap_server='imap.fastmail.com', port=993):
+def read_sent_emails(username=None, password=None, recipient='quordleleaderboard@gmail.com', imap_server='imap.fastmail.com', port=993):
     # Connect to database
     conn, cursor = create_database()
     
+    if not username:
+        username = os.environ.get('EMAIL_USERNAME')
+        if not username:
+            username = input("Enter your email username: ")
+
     # If no password is provided, try to get it from environment variable or prompt
     if not password:
         password = os.environ.get('EMAIL_PASSWORD')
@@ -239,7 +244,7 @@ def display_scores():
 
 # Usage
 if __name__ == "__main__":
-    emails_processed = read_sent_emails('capon@fastmail.com')
+    emails_processed = read_sent_emails()
     
     # Display the scores stored in the database
     if emails_processed > 0:
