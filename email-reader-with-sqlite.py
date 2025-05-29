@@ -53,8 +53,7 @@ def read_sent_emails(username=None, password=None, recipient='quordleleaderboard
         
         # Try multiple ways of selecting the sent folder
         sent_folder_attempts = [
-            '"Sent Items"'
-            #'"Sent\\ Items"'
+            '"Inbox"'
         ]
         
         scores_saved = 0
