@@ -29,10 +29,15 @@ def create_database():
     conn.commit()
     return conn, cursor
 
-def read_sent_emails(username=None, password=None, recipient='quordleleaderboard@gmail.com', imap_server='imap.fastmail.com', port=993):
+def read_sent_emails(username=None, password=None, recipient='quordleleaderboard@gmail.com', imap_server=None, port=993):
     # Connect to database
     conn, cursor = create_database()
     
+    if not imap_server:
+        imap_server = os.environ.get('IMAP_SERVER')
+        if not imap_server:
+            imap_server = input("Enter your IMAP server: ")
+
     if not username:
         username = os.environ.get('EMAIL_USERNAME')
         if not username:
