@@ -1,4 +1,5 @@
 import imaplib
+import argparse
 import email
 import os
 import sqlite3
@@ -6,9 +7,9 @@ from getpass import getpass
 import emoji
 from datetime import datetime
 
-def create_database():
+def create_database(quordle_db_name='quordle_scores.db'):
     """Create SQLite database and table if they don't exist"""
-    conn = sqlite3.connect('quordle_scores.db')
+    conn = sqlite3.connect(quordle_db_name)
     cursor = conn.cursor()
     
     # Create table to store Quordle scores
@@ -29,9 +30,9 @@ def create_database():
     conn.commit()
     return conn, cursor
 
-def read_sent_emails(username=None, password=None, recipient='quordleleaderboard@gmail.com', imap_server=None, port=993):
+def read_sent_emails(quordle_db_name ,username=None, password=None, recipient='quordleleaderboard@gmail.com', imap_server=None, port=993):
     # Connect to database
-    conn, cursor = create_database()
+    conn, cursor = create_database(quordle_db_name)
     
     if not imap_server:
         imap_server = os.environ.get('IMAP_SERVER')
@@ -218,9 +219,9 @@ def parseSnippet(msg):
         print('Email had no parseable content?')
         return -1
 
-def display_scores():
+def display_scores(quordle_db_name='quordle_scores.db'):
     """Display scores from the database"""
-    conn = sqlite3.connect('quordle_scores.db')
+    conn = sqlite3.connect(quordle_db_name)
     cursor = conn.cursor()
     
     cursor.execute('''
@@ -248,10 +249,21 @@ def display_scores():
 
 # Usage
 if __name__ == "__main__":
-    emails_processed = read_sent_emails()
+    parser = argparse.ArgumentParser(description='Process Quorle scores from sent emails and store them in a SQLite database.')
+
+    parser.add_argument('quordledb', help='Path to the SQL database file')
+    
+    args = parser.parse_args()
+    quordle_db_name = args.quordledb
+    
+    print(f"Using SQL database: {quordle_db_name}")
+
+    emails_processed = read_sent_emails(quordle_db_name)
     
     # Display the scores stored in the database
     if emails_processed > 0:
         print(f"Processed {emails_processed} emails")
     
-    display_scores()
+    display_scores(quordle_db_name)
+
+

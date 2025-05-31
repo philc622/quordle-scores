@@ -1,8 +1,9 @@
+import argparse
 import sqlite3
 import csv
 from pathlib import Path
 
-def export_scores_to_csv(output_filename='quordle_scores.csv'):
+def export_scores_to_csv(quordle_db_name='quordle_scores.db', output_filename='quordle_scores.csv'):
     """
     Query the quordle_scores database and export to a CSV file with columns:
     date, score1, score2, score3, score4, sum, max
@@ -15,7 +16,7 @@ def export_scores_to_csv(output_filename='quordle_scores.csv'):
     """
     try:
         # Connect to the database
-        conn = sqlite3.connect('quordle_scores.db')
+        conn = sqlite3.connect(quordle_db_name)
         cursor = conn.cursor()
         
         # Query only the raw scores and date
@@ -69,5 +70,16 @@ def export_scores_to_csv(output_filename='quordle_scores.csv'):
 
 # Example usage (if run as standalone script)
 if __name__ == "__main__":
-    result = export_scores_to_csv()
+    parser = argparse.ArgumentParser(description='Extracts Quordle scores from a SQL database and exports them to a CSV file.')
+
+    parser.add_argument('quordledb', help='Path to the SQL database file')
+    parser.add_argument('outputcsv', help='Path to the generated CSV file')
+    
+    args = parser.parse_args()
+    quordle_db_name = args.quordledb
+    output_filename = args.outputcsv
+    
+    print(f"Using SQL database: {quordle_db_name}")
+
+    result = export_scores_to_csv(quordle_db_name, output_filename)
     print(result)
