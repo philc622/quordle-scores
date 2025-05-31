@@ -27,8 +27,13 @@ mkdir -p "$SCRIPTS_FOLDER"
 echo "Copying Python scripts..."
 cp quordle-scores/*.py $SCRIPTS_FOLDER
 
+echo "Copying Bash scripts..."
+cp quordle-scores/*.sh $SCRIPTS_FOLDER
+
 # Count copied files
 COPIED_COUNT=$(find "$SCRIPTS_FOLDER" -name "*.py" | wc -l)
+COPIED_COUNT_BASH=$(find "$SCRIPTS_FOLDER" -name "*.sh" | wc -l)
 
 echo "Done!"
 echo "Copied $COPIED_COUNT Python script(s) to $SCRIPTS_FOLDER/"
+echo "Copied $COPIED_COUNT_BASH Bash script(s) to $SCRIPTS_FOLDER/"
