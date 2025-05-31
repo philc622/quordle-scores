@@ -4,9 +4,9 @@ set -e  # Exit on any error
 
 echo "Check for any new scores and update the database"
 
-#source ~/.env
+source ~/.env
 
-#source ~/quordle-scores/env/bin/activate
+source ~/quordle-scores/env/bin/activate
 
 # run email-reader-with-sqlite.py
 python ~/scripts/email-reader-with-sqlite.py ~/data/quordle-scores.db
