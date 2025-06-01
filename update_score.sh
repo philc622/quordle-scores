@@ -13,4 +13,6 @@ python ~/scripts/email-reader-with-sqlite.py ~/data/quordle_scores.db
 
 python ~/scripts/extract_to_csv.py ~/data/quordle_scores.db ~/data/quordle_scores.csv
 
+cp ~/data/quordle_scores.csv /var/www/html/quordle
+
 echo "Done!"
