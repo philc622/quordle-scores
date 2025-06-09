@@ -401,10 +401,8 @@
             });
             
             // Count perfect scores (all 4s or better)
-            const perfectCount = allData.filter(row => 
-                row['Score 1'] <= 4 && row['Score 2'] <= 4 && 
-                row['Score 3'] <= 4 && row['Score 4'] <= 4
-            ).length;
+            const sevenOrLess = allData.filter(row => 
+                row['Max'] === 7 || row['Max'] === 6).length;
 
             // Update statistic displays
             // TODO show number of days since failure
@@ -417,7 +415,7 @@
             document.getElementById('totalGames').textContent = totalGames;
             document.getElementById('avgSum').textContent = avgSum;
             document.getElementById('bestGame').textContent = bestSum === Number.MAX_VALUE ? '0' : bestSum;
-            document.getElementById('perfectScores').textContent = perfectCount;
+            document.getElementById('perfectScores').textContent = sevenOrLess - (totalGames-sevenOrLess);
         }
 
         function populateTable() {
