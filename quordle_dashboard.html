@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +16,13 @@
             background-color: #f5f5f5;
             color: #333;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
         header {
             background-color: #4b3f72;
             color: white;
@@ -27,59 +30,68 @@
             text-align: center;
             margin-bottom: 30px;
         }
+
         h1 {
             margin: 0;
         }
+
         .status-container {
             background: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             text-align: center;
         }
+
         .chart-container {
             background: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
+
         .chart-row {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 30px;
         }
+
         .chart-card {
             flex: 1;
             min-width: 300px;
             background: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .stats-container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 30px;
         }
+
         .stat-card {
             flex: 1;
             min-width: 200px;
             background: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+
         .stat-value {
             font-size: 2.5rem;
             font-weight: bold;
             color: #4b3f72;
             margin: 10px 0;
         }
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -87,27 +99,36 @@
             background: white;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .data-table th, .data-table td {
+
+        .data-table th,
+        .data-table td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
+
         .data-table th {
             background-color: #4b3f72;
             color: white;
         }
+
         .data-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
         .data-table tr:hover {
             background-color: #f1f1f1;
         }
-        #lineChartContainer, #barChartContainer, #radarChartContainer {
+
+        #lineChartContainer,
+        #barChartContainer,
+        #radarChartContainer {
             position: relative;
             height: 400px;
         }
+
         .instructions {
             background: #e9f7fe;
             border-left: 4px solid #2196F3;
@@ -115,6 +136,7 @@
             margin-bottom: 20px;
             border-radius: 4px;
         }
+
         .button {
             background-color: #4b3f72;
             color: white;
@@ -126,13 +148,16 @@
             margin: 10px 5px;
             transition: background-color 0.3s;
         }
+
         .button:hover {
             background-color: #352b50;
         }
+
         #loader {
             text-align: center;
             padding: 20px;
         }
+
         .spinner {
             border: 6px solid #f3f3f3;
             border-top: 6px solid #4b3f72;
@@ -142,10 +167,17 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
+
         .error-message {
             background-color: #ffebee;
             color: #c62828;
@@ -154,16 +186,19 @@
             margin-bottom: 20px;
             border-left: 4px solid #c62828;
         }
+
         @media (max-width: 768px) {
             .chart-row {
                 flex-direction: column;
             }
+
             .chart-card {
                 width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -174,7 +209,8 @@
     <div class="container">
         <div class="instructions">
             <h3>About this dashboard:</h3>
-            <p>This dashboard automatically loads and visualizes your Quordle data from "quordle_scores.csv" in the same folder as this HTML file.</p>
+            <p>This dashboard automatically loads and visualizes your Quordle data from "quordle_scores.csv" in the same
+                folder as this HTML file.</p>
         </div>
 
         <div class="status-container">
@@ -188,6 +224,10 @@
         <div id="dashboard" style="display: none;">
             <div class="stats-container">
                 <div class="stat-card">
+                    <h3>Win Score Diff</h3>
+                    <div id="winScoreDiff" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
                     <h3>Games Analyzed</h3>
                     <div id="totalGames" class="stat-value">0</div>
                 </div>
@@ -198,10 +238,6 @@
                 <div class="stat-card">
                     <h3>Best Game</h3>
                     <div id="bestGame" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Perfect Scores</h3>
-                    <div id="perfectScores" class="stat-value">0</div>
                 </div>
             </div>
 
@@ -285,14 +321,14 @@
         document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
 
         // Load CSV file automatically when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadQuordleScoresFile();
         });
 
         function loadQuordleScoresFile() {
             // Define the path to the CSV file
             const csvFilePath = 'quordle_scores.csv';
-            
+
             // Set up fetch request
             fetch(csvFilePath)
                 .then(response => {
@@ -306,13 +342,15 @@
                     Papa.parse(csvText, {
                         header: true,
                         dynamicTyping: true,
-                        complete: function(results) {
+                        complete: function (results) {
                             if (results.data && results.data.length > 0) {
                                 // Remove any rows that don't have complete data
-                                const validData = results.data.filter(row => 
-                                    row.Date && row['Score 1'] !== undefined && 
-                                    row['Score 2'] !== undefined && row['Score 3'] !== undefined && 
-                                    row['Score 4'] !== undefined);
+                                // or refer to missed day (ie 13 for every word)
+                                const validData = results.data.filter(row =>
+                                    row.Date && row['Score 1'] !== undefined &&
+                                    row['Score 2'] !== undefined && row['Score 3'] !== undefined &&
+                                    row['Score 4'] !== undefined
+                                    && row['Sum'] !== 52);
 
                                 // Calculate Sum and Max if they don't exist
                                 validData.forEach(row => {
@@ -323,18 +361,18 @@
                                         row.Max = Math.max(row['Score 1'], row['Score 2'], row['Score 3'], row['Score 4']);
                                     }
                                 });
-                                
+
                                 // Update status message
                                 document.getElementById('status-message').textContent = `Successfully loaded ${validData.length} Quordle scores!`;
                                 document.getElementById('loader').style.display = 'none';
-                                
+
                                 // Process the data
                                 processData(validData);
                             } else {
                                 showError('No valid data found in the CSV file');
                             }
                         },
-                        error: function(error) {
+                        error: function (error) {
                             console.error('Error parsing CSV:', error);
                             showError('Error parsing the CSV file. Please check the format.');
                         }
@@ -349,15 +387,15 @@
         function showError(message) {
             const statusContainer = document.querySelector('.status-container');
             document.getElementById('loader').style.display = 'none';
-            
+
             // Create error message element
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-message';
             errorDiv.textContent = message;
-            
+
             // Update status message
             document.getElementById('status-message').textContent = 'Error loading data';
-            
+
             // Add error message to container
             statusContainer.insertBefore(errorDiv, document.getElementById('loadSampleData'));
         }
@@ -365,43 +403,43 @@
         function loadSampleData() {
             document.getElementById('status-message').textContent = 'Using sample data';
             document.getElementById('loader').style.display = 'none';
-            
+
             // Remove any error messages
             const errorMessages = document.querySelectorAll('.error-message');
             errorMessages.forEach(el => el.remove());
-            
+
             // Process the sample data
             processData(sampleData);
         }
 
         function processData(data) {
             allData = data;
-            
+
             // Sort data by date (oldest to newest)
             allData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
-            
+
             updateStatistics();
             populateTable();
             createCharts();
-            
+
             document.getElementById('dashboard').style.display = 'block';
         }
 
         function updateStatistics() {
             const totalGames = allData.length;
-            
+
             // Calculate average sum
             const totalSum = allData.reduce((sum, row) => sum + row.Sum, 0);
             const avgSum = totalGames > 0 ? (totalSum / totalGames).toFixed(1) : 0;
-            
+
             // Find best game (lowest sum)
             let bestSum = Number.MAX_VALUE;
             allData.forEach(row => {
                 if (row.Sum < bestSum) bestSum = row.Sum;
             });
-            
+
             // Count perfect scores (all 4s or better)
-            const sevenOrLess = allData.filter(row => 
+            const sevenOrLess = allData.filter(row =>
                 row['Max'] === 7 || row['Max'] === 6).length;
 
             // Update statistic displays
@@ -415,31 +453,54 @@
             document.getElementById('totalGames').textContent = totalGames;
             document.getElementById('avgSum').textContent = avgSum;
             document.getElementById('bestGame').textContent = bestSum === Number.MAX_VALUE ? '0' : bestSum;
-            document.getElementById('perfectScores').textContent = sevenOrLess - (totalGames-sevenOrLess);
+            document.getElementById('winScoreDiff').textContent = sevenOrLess - (totalGames - sevenOrLess);
         }
 
+        function longestSequenceBetweenFails(arr) {
+            if (allData.length === 0) return 0;
+
+            let maxLength = 0;
+            let currentLength = 0;
+            let foundFirstFail = false;
+
+            for (let i = 0; i < allData.length; i++) {
+                if (allData[i].Max === 13) {
+                    if (foundFirstFail) {
+                        // We found another fail, so we have a complete sequence
+                        maxLength = Math.max(maxLength, currentLength);
+                    }
+                    foundFirstFail = true;
+                    currentLength = 0;
+                } else {
+                    if (foundFirstFail) {
+                        currentLength++;
+                    }
+                }
+            }
+        } 
+        
         function populateTable() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
-            
+
             // Add the most recent 20 rows (or all if less than 20)
             const recentData = [...allData].reverse().slice(0, 20);
-            
+
             recentData.forEach(row => {
                 const tr = document.createElement('tr');
-                
+
                 // Format the date nicely
                 const dateCell = document.createElement('td');
                 const dateObj = new Date(row.Date);
-                const formattedDate = isNaN(dateObj.getTime()) ? row.Date : 
-                    dateObj.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
+                const formattedDate = isNaN(dateObj.getTime()) ? row.Date :
+                    dateObj.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
                     });
                 dateCell.textContent = formattedDate;
                 tr.appendChild(dateCell);
-                
+
                 // Add score cells
                 const cells = ['Score 1', 'Score 2', 'Score 3', 'Score 4', 'Sum', 'Max'];
                 cells.forEach(key => {
@@ -447,7 +508,7 @@
                     td.textContent = row[key];
                     tr.appendChild(td);
                 });
-                
+
                 tableBody.appendChild(tr);
             });
         }
@@ -463,11 +524,11 @@
             // Prepare data for line chart
             const dates = allData.map(row => row.Date);
             const sums = allData.map(row => row.Sum);
-            
+
             // Calculate moving average (7-day)
             const movingAvg = [];
             const windowSize = Math.min(7, allData.length);
-            
+
             for (let i = 0; i < sums.length; i++) {
                 if (i < windowSize - 1) {
                     // Not enough data points yet for full window
@@ -483,11 +544,11 @@
             }
 
             const ctx = document.getElementById('lineChart').getContext('2d');
-            
+
             if (lineChart) {
                 lineChart.destroy();
             }
-            
+
             lineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -537,14 +598,14 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                title: function(tooltipItems) {
+                                title: function (tooltipItems) {
                                     const dateStr = tooltipItems[0].label;
                                     const date = new Date(dateStr);
-                                    return isNaN(date.getTime()) ? dateStr : 
-                                        date.toLocaleDateString('en-US', { 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
+                                    return isNaN(date.getTime()) ? dateStr :
+                                        date.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
                                         });
                                 }
                             }
@@ -563,8 +624,8 @@
             scoreFreqs["Score 7"] = 0
             scoreFreqs["Score 8"] = 0
             scoreFreqs["Score 9"] = 0
-            scoreFreqs["Failed"] = 0        
-            
+            scoreFreqs["Failed"] = 0
+
             allData.forEach(row => {
                 if (row["Max"] == 13) {
                     scoreFreqs["Failed"]++;
@@ -572,35 +633,35 @@
                     scoreFreqs["Score " + row["Max"]]++;
                 }
             });
-            
+
             const labels = Object.keys(scoreFreqs);
-            const data = Object.values(scoreFreqs);           
-            
+            const data = Object.values(scoreFreqs);
+
             const ctx = document.getElementById('barChart').getContext('2d');
-            
+
             if (barChart) {
                 barChart.destroy();
             }
 
-            
+
             const colors = [
-    'purple', // excellent - bright green
-    '#22c55e', // good - lime green
-    '#eab308', // average - yellow
-    '#f97316', // poor - orange
-    '#ef4444'  // terrible - red
-];
+                'purple', // excellent - bright green
+                '#22c55e', // good - lime green
+                '#eab308', // average - yellow
+                '#f97316', // poor - orange
+                '#ef4444'  // terrible - red
+            ];
 
             const chartData = {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Frequency',
-                            data: data,
-                            backgroundColor: colors
-                        }
-                    ]
-                };
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Frequency',
+                        data: data,
+                        backgroundColor: colors
+                    }
+                ]
+            };
 
             const config = {
                 type: 'bar',
@@ -638,29 +699,29 @@
                     }
                 }
             };
-            
+
             barChart = new Chart(ctx, config);
         }
 
         function createRadarChart() {
             // Calculate average scores for each position
             let totalScores = [0, 0, 0, 0];
-            
+
             allData.forEach(row => {
                 totalScores[0] += row["Score 1"];
                 totalScores[1] += row["Score 2"];
                 totalScores[2] += row["Score 3"];
                 totalScores[3] += row["Score 4"];
             });
-            
+
             const avgScores = totalScores.map(score => allData.length > 0 ? score / allData.length : 0);
-            
+
             const ctx = document.getElementById('radarChart').getContext('2d');
-            
+
             if (radarChart) {
                 radarChart.destroy();
             }
-            
+
             radarChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
@@ -699,18 +760,18 @@
             // Get the 10 most recent games
             const recentData = [...allData].slice(-10);
             const dates = recentData.map(row => row.Date);
-            
+
             const dataset1 = recentData.map(row => row["Score 1"]);
             const dataset2 = recentData.map(row => row["Score 2"]);
             const dataset3 = recentData.map(row => row["Score 3"]);
             const dataset4 = recentData.map(row => row["Score 4"]);
-            
+
             const ctx = document.getElementById('recentChart').getContext('2d');
-            
+
             if (recentChart) {
                 recentChart.destroy();
             }
-            
+
             recentChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -770,14 +831,14 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                title: function(tooltipItems) {
+                                title: function (tooltipItems) {
                                     const dateStr = tooltipItems[0].label;
                                     const date = new Date(dateStr);
-                                    return isNaN(date.getTime()) ? dateStr : 
-                                        date.toLocaleDateString('en-US', { 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
+                                    return isNaN(date.getTime()) ? dateStr :
+                                        date.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
                                         });
                                 }
                             }
@@ -788,4 +849,5 @@
         }
     </script>
 </body>
+
 </html>
