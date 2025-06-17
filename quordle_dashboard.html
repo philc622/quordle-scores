@@ -209,8 +209,6 @@
     <div class="container">
         <div class="instructions">
             <h3>About this dashboard:</h3>
-            <p>This dashboard automatically loads and visualizes your Quordle data from "quordle_scores.csv" in the same
-                folder as this HTML file.</p>
         </div>
 
         <div class="status-container">
@@ -224,12 +222,12 @@
         <div id="dashboard" style="display: none;">
             <div class="stats-container">
                 <div class="stat-card">
-                    <h3>Win Score Diff</h3>
-                    <div id="winScoreDiff" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
                     <h3>Games Analyzed</h3>
                     <div id="totalGames" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Win Score Diff</h3>
+                    <div id="winScoreDiff" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
                     <h3>Average Sum</h3>
@@ -243,15 +241,15 @@
 
             <div class="chart-row">
                 <div class="chart-card">
-                    <h2>Score Trends Over Time</h2>
-                    <div id="lineChartContainer">
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-card">
                     <h2>Score Distribution</h2>
                     <div id="barChartContainer">
                         <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h2>Score Trends Over Time</h2>
+                    <div id="lineChartContainer">
+                        <canvas id="lineChart"></canvas>
                     </div>
                 </div>
             </div>
