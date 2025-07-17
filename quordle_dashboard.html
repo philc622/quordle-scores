@@ -202,21 +202,16 @@
 <body>
     <header>
         <div class="container">
-            <h1>Quordle Scores Visualization</h1>
+            <h1>Phil's Quordle Scores</h1>
         </div>
     </header>
 
     <div class="container">
-        <div class="instructions">
-            <h3>About this dashboard:</h3>
-        </div>
-
         <div class="status-container">
             <div id="status-message">Loading your Quordle scores...</div>
             <div id="loader">
                 <div class="spinner"></div>
             </div>
-            <button id="loadSampleData" class="button">Use Sample Data Instead</button>
         </div>
 
         <div id="dashboard" style="display: none;">
@@ -297,26 +292,6 @@
         let lineChart, barChart, radarChart, recentChart;
         let allData = [];
 
-        // Sample data for demonstration
-        const sampleData = [
-            { "Date": "2025-04-18", "Score 1": 4, "Score 2": 5, "Score 3": 4, "Score 4": 6, "Sum": 19, "Max": 6 },
-            { "Date": "2025-04-17", "Score 1": 5, "Score 2": 6, "Score 3": 5, "Score 4": 9, "Sum": 25, "Max": 9 },
-            { "Date": "2025-04-16", "Score 1": 3, "Score 2": 4, "Score 3": 5, "Score 4": 4, "Sum": 16, "Max": 5 },
-            { "Date": "2025-04-15", "Score 1": 4, "Score 2": 7, "Score 3": 4, "Score 4": 5, "Sum": 20, "Max": 7 },
-            { "Date": "2025-04-14", "Score 1": 6, "Score 2": 5, "Score 3": 6, "Score 4": 7, "Sum": 24, "Max": 7 },
-            { "Date": "2025-04-13", "Score 1": 3, "Score 2": 3, "Score 3": 4, "Score 4": 5, "Sum": 15, "Max": 5 },
-            { "Date": "2025-04-12", "Score 1": 5, "Score 2": 4, "Score 3": 6, "Score 4": 5, "Sum": 20, "Max": 6 },
-            { "Date": "2025-04-11", "Score 1": 4, "Score 2": 4, "Score 3": 7, "Score 4": 8, "Sum": 23, "Max": 8 },
-            { "Date": "2025-04-10", "Score 1": 4, "Score 2": 5, "Score 3": 5, "Score 4": 6, "Sum": 20, "Max": 6 },
-            { "Date": "2025-04-09", "Score 1": 3, "Score 2": 4, "Score 3": 3, "Score 4": 5, "Sum": 15, "Max": 5 },
-            { "Date": "2025-04-08", "Score 1": 5, "Score 2": 6, "Score 3": 7, "Score 4": 6, "Sum": 24, "Max": 7 },
-            { "Date": "2025-04-07", "Score 1": 4, "Score 2": 5, "Score 3": 3, "Score 4": 4, "Sum": 16, "Max": 5 },
-            { "Date": "2025-04-06", "Score 1": 6, "Score 2": 7, "Score 3": 5, "Score 4": 8, "Sum": 26, "Max": 8 },
-            { "Date": "2025-04-05", "Score 1": 4, "Score 2": 4, "Score 3": 6, "Score 4": 5, "Sum": 19, "Max": 6 }
-        ];
-
-        // Event listener for sample data
-        document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
 
         // Load CSV file automatically when page loads
         document.addEventListener('DOMContentLoaded', function () {
@@ -394,20 +369,6 @@
             // Update status message
             document.getElementById('status-message').textContent = 'Error loading data';
 
-            // Add error message to container
-            statusContainer.insertBefore(errorDiv, document.getElementById('loadSampleData'));
-        }
-
-        function loadSampleData() {
-            document.getElementById('status-message').textContent = 'Using sample data';
-            document.getElementById('loader').style.display = 'none';
-
-            // Remove any error messages
-            const errorMessages = document.querySelectorAll('.error-message');
-            errorMessages.forEach(el => el.remove());
-
-            // Process the sample data
-            processData(sampleData);
         }
 
         function processData(data) {
