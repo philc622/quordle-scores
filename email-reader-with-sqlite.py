@@ -30,7 +30,7 @@ def create_database(quordle_db_name='quordle_scores.db'):
     conn.commit()
     return conn, cursor
 
-def read_sent_emails(quordle_db_name ,username=None, password=None, recipient='quordleleaderboard@gmail.com', imap_server=None, port=993):
+def read_sent_emails(quordle_db_name ,username=None, password=None, imap_server=None, port=993):
     # Connect to database
     conn, cursor = create_database(quordle_db_name)
     
@@ -74,7 +74,7 @@ def read_sent_emails(quordle_db_name ,username=None, password=None, recipient='q
                     
                     # Use US-ASCII search to avoid potential encoding issues
                     search_type = 'TO'
-                    search_criteria = f'TO "{recipient}"'
+                    search_criteria = f'TO "{username}"'
                     
                     # Perform the search
                     typ, search_data = mail.search(None, search_criteria.encode('us-ascii'))
@@ -84,7 +84,7 @@ def read_sent_emails(quordle_db_name ,username=None, password=None, recipient='q
                     
                     # If no emails found, continue to next folder
                     if not email_ids:
-                        print(f"No emails found in {folder} folder to {recipient}")
+                        print(f"No emails found in {folder} folder to {username}")
                         continue
                     
                     # Limit to first 100 emails
