@@ -207,30 +207,23 @@
     </header>
 
     <div class="container">
-        <div class="status-container">
-            <div id="status-message">Loading your Quordle scores...</div>
-            <div id="loader">
-                <div class="spinner"></div>
-            </div>
-        </div>
-
         <div id="dashboard" style="display: none;">
             <div class="stats-container">
                 <div class="stat-card">
-                    <h3>Games Analyzed</h3>
-                    <div id="totalGames" class="stat-value">0</div>
+                    <h3 id="stat-label1"></h3>
+                    <div id="stat1" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Win Score Diff</h3>
-                    <div id="winScoreDiff" class="stat-value">0</div>
+                    <h3 id="stat-label2"></h3>
+                    <div id="stat2" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Average Sum</h3>
-                    <div id="avgSum" class="stat-value">0</div>
+                    <h3 id="stat-label3"></h3>
+                    <div id="stat3" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Best Game</h3>
-                    <div id="bestGame" class="stat-value">0</div>
+                    <h3 id="stat-label4"></h3>
+                    <div id="stat4" class="stat-value">0</div>
                 </div>
             </div>
 
@@ -271,10 +264,6 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Score 1</th>
-                                <th>Score 2</th>
-                                <th>Score 3</th>
-                                <th>Score 4</th>
                                 <th>Sum</th>
                                 <th>Max</th>
                             </tr>
@@ -286,6 +275,13 @@
                 </div>
             </div>
         </div>
+        <div class="status-container">
+            <div id="status-message">Loading your Quordle scores...</div>
+            <div id="loader">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -387,32 +383,27 @@
         function updateStatistics() {
             const totalGames = allData.length;
 
-            // Calculate average sum
-            const totalSum = allData.reduce((sum, row) => sum + row.Sum, 0);
-            const avgSum = totalGames > 0 ? (totalSum / totalGames).toFixed(1) : 0;
-
-            // Find best game (lowest sum)
-            let bestSum = Number.MAX_VALUE;
-            allData.forEach(row => {
-                if (row.Sum < bestSum) bestSum = row.Sum;
-            });
-
             // Count perfect scores (all 4s or better)
             const sevenOrLess = allData.filter(row =>
                 row['Max'] === 7 || row['Max'] === 6).length;
 
             // Update statistic displays
             // TODO show number of days since failure
-            // TODO show the total 6+7s vs the rest
-            // TODO show longest streak
             // TODO checkbox to show/not show prehistory
-            // TODO show average score over time
+            // TODO show average win diff over time
             // TODO show last 7 scores (coloured)
             // TODO how to handle missing days?
-            document.getElementById('totalGames').textContent = totalGames;
-            document.getElementById('avgSum').textContent = avgSum;
-            document.getElementById('bestGame').textContent = bestSum === Number.MAX_VALUE ? '0' : bestSum;
-            document.getElementById('winScoreDiff').textContent = sevenOrLess - (totalGames - sevenOrLess);
+            document.getElementById('stat-label1').textContent = 'Games Analyzed'
+            document.getElementById('stat1').textContent = totalGames;
+
+            document.getElementById('stat-label2').textContent = 'Win Score Diff'
+            document.getElementById('stat2').textContent = sevenOrLess - (totalGames - sevenOrLess);
+
+            document.getElementById('stat-label3').textContent = 'Current Win Streak'
+            document.getElementById('stat3').textContent = -999;
+
+            document.getElementById('stat-label4').textContent = 'Longest Win Streak'
+            document.getElementById('stat4').textContent = longestSequenceBetweenFails(allData);
         }
 
         function longestSequenceBetweenFails(arr) {
@@ -436,6 +427,7 @@
                     }
                 }
             }
+            return maxLength
         } 
         
         function populateTable() {
@@ -461,7 +453,7 @@
                 tr.appendChild(dateCell);
 
                 // Add score cells
-                const cells = ['Score 1', 'Score 2', 'Score 3', 'Score 4', 'Sum', 'Max'];
+                const cells = ['Sum', 'Max'];
                 cells.forEach(key => {
                     const td = document.createElement('td');
                     td.textContent = row[key];
