@@ -400,7 +400,7 @@
             document.getElementById('stat2').textContent = sevenOrLess - (totalGames - sevenOrLess);
 
             document.getElementById('stat-label3').textContent = 'Current Streak'
-            document.getElementById('stat3').textContent = -999;
+            document.getElementById('stat3').textContent = countBeforeValueBackwards(allData, 'Max', 13 );
 
             document.getElementById('stat-label4').textContent = 'Longest Streak'
             document.getElementById('stat4').textContent = longestSequenceBetweenFails(allData);
@@ -429,6 +429,15 @@
             }
             return maxLength
         } 
+
+        function countBeforeValueBackwards(arr, key, value) {
+            for (let i = arr.length - 1, count = 0; i >= 0; i--, count++) {
+                if (arr[i][key] === value) {
+                    return count;
+                }
+            }
+            return arr.length;
+        }
         
         function populateTable() {
             const tableBody = document.getElementById('tableBody');
