@@ -207,6 +207,13 @@
     </header>
 
     <div class="container">
+                <div class="status-container">
+            <div id="status-message">Loading your Quordle scores...</div>
+            <div id="loader">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
         <div id="dashboard" style="display: none;">
             <div class="stats-container">
                 <div class="stat-card">
@@ -275,13 +282,6 @@
                 </div>
             </div>
         </div>
-        <div class="status-container">
-            <div id="status-message">Loading your Quordle scores...</div>
-            <div id="loader">
-                <div class="spinner"></div>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -332,7 +332,7 @@
                                 });
 
                                 // Update status message
-                                document.getElementById('status-message').textContent = `Successfully loaded ${validData.length} Quordle scores!`;
+                                document.getElementById('status-message').textContent = `Successfully loaded ${validData.length} Quordle scores up to ${validData[0]['Date']}!`;
                                 document.getElementById('loader').style.display = 'none';
 
                                 // Process the data
