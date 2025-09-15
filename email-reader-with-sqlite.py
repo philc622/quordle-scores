@@ -87,8 +87,8 @@ def read_sent_emails(quordle_db_name ,username=None, password=None, imap_server=
                         print(f"No emails found in {folder} folder to {username}")
                         continue
                     
-                    # Limit to first 100 emails
-                    emails_to_read = email_ids[:100]
+                    # Limit to first 200 emails
+                    emails_to_read = email_ids[:200]
                     
                     # Store emails to process after closing connection
                     email_contents = []
