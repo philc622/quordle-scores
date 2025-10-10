@@ -7,6 +7,14 @@ Note the old pre-history scores from before I started doing Quordle leaderboard:
 9s 193
 Fails 65
 
+Also strategies used
+1 - up to 24 Jul-24
+2 - between 24-Jul and 28-Sep
+1 - from 29-Sep
+
+1 - stare, cloud, hying
+2 - stare, doily, punch
+
 
 Python set up 
 - to get requirements.txt file:
