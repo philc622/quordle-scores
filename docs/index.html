@@ -483,6 +483,11 @@
             // Prepare data for line chart
             const dates = allData.map(row => row.Date);
             const sums = allData.map(row => row.Sum);
+            const deltas = allData.map(row => row.Max <= 7 ? -1 : 1);
+            const cumulative = deltas.reduce((acc, curr) => {
+                acc.push((acc.length ? acc[acc.length - 1] : 0) + curr);
+                return acc;
+            }, []);
 
             // Calculate moving average (7-day)
             const movingAvg = [];
@@ -515,21 +520,13 @@
                     datasets: [
                         {
                             label: 'Sum of Scores',
-                            data: sums,
+                            data: cumulative,
                             borderColor: 'rgba(75, 63, 114, 1)',
                             backgroundColor: 'rgba(75, 63, 114, 0.1)',
+                            borderWidth: 1,
+                            pointRadius: 0,
                             tension: 0.1,
                             fill: true
-                        },
-                        {
-                            label: '7-Day Moving Average',
-                            data: movingAvg,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            tension: 0.4
                         }
                     ]
                 },
@@ -539,7 +536,7 @@
                     scales: {
                         y: {
                             beginAtZero: false,
-                            min: Math.max(0, Math.min(...sums) - 2),
+                            min: Math.max(0, Math.min(...cumulative) - 2),
                             max: Math.max(...sums) + 2,
                             title: {
                                 display: true,
