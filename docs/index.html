@@ -717,7 +717,7 @@
             const recentData = [...allData].slice(-10);
             const dates = recentData.map(row => row.Date);
 
-            const dataset1 = recentData.map(row => row["Score 1"]);
+            const dataset1 = recentData.map(row => row["Max"]);
             const dataset2 = recentData.map(row => row["Score 2"]);
             const dataset3 = recentData.map(row => row["Score 3"]);
             const dataset4 = recentData.map(row => row["Score 4"]);
@@ -734,30 +734,9 @@
                     labels: dates,
                     datasets: [
                         {
-                            label: 'Word 1',
+                            label: 'Max score',
                             data: dataset1,
                             borderColor: 'rgba(75, 63, 114, 1)',
-                            backgroundColor: 'transparent',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Word 2',
-                            data: dataset2,
-                            borderColor: 'rgba(66, 133, 244, 1)',
-                            backgroundColor: 'transparent',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Word 3',
-                            data: dataset3,
-                            borderColor: 'rgba(219, 68, 55, 1)',
-                            backgroundColor: 'transparent',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Word 4',
-                            data: dataset4,
-                            borderColor: 'rgba(15, 157, 88, 1)',
                             backgroundColor: 'transparent',
                             tension: 0.1
                         }
