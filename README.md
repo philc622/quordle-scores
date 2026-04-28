@@ -22,8 +22,15 @@ pip install pipreqs
 pipreqs .
 
 - when installing onto new WSL dist:
-install pip
-pip install virtualenv
-virtualenv env
-source env/bin/activate
-pip install -r requirements.txt
+1. install pip
+2. pip install virtualenv
+3. virtualenv env
+4. source env/bin/activate
+5. pip install -r requirements.txt
+
+- when installing onto Raspberry Pi
+1. sudo apt install pip (as root)
+2. sudo apt install python3-virtualenv (as root)
+3. virtualenv env (in source folder)
+4. source env/bin/activate
+5. pip install -r requirements.txt
