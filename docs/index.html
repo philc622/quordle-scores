@@ -65,6 +65,33 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-header h2 {
+            margin: 0;
+        }
+
+        .period-selector {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: white;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .period-selector:focus {
+            outline: none;
+            border-color: #4b3f72;
         }
 
         .stats-container {
@@ -241,24 +268,17 @@
                     </div>
                 </div>
                 <div class="chart-card">
-                    <h2>Score Trends Over Time</h2>
+                    <div class="chart-header">
+                        <h2>Score Trends Over Time</h2>
+                        <select id="periodSelector" class="period-selector">
+                            <option value="year">Last Year</option>
+                            <option value="3months">Last 3 Months</option>
+                            <option value="month">Last Month</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
                     <div id="lineChartContainer">
                         <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-row">
-                <div class="chart-card">
-                    <h2>Individual Word Performance</h2>
-                    <div id="radarChartContainer">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <h2>Recent Performance</h2>
-                    <div id="recentChartContainer">
-                        <canvas id="recentChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -376,7 +396,56 @@
             populateTable();
             createCharts();
 
+            // Set up period selector listener
+            document.getElementById('periodSelector').addEventListener('change', function() {
+                const period = this.value;
+                updateLineChartForPeriod(period);
+            });
+
             document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function updateLineChartForPeriod(period) {
+            let filteredData = allData;
+
+            if (period !== 'all' && allData.length > 0) {
+                // Use the latest date in the data as the reference point instead of 'now'
+                // to handle historical data correctly
+                const latestDate = new Date(allData[allData.length - 1].Date);
+
+                let startDate;
+                // date-fns 2.x uses global 'dateFns' object, but check if it's available
+                const df = typeof dateFns !== 'undefined' ? dateFns : null;
+
+                if (df) {
+                    if (period === 'month') {
+                        startDate = df.subMonths(latestDate, 1);
+                    } else if (period === '3months') {
+                        startDate = df.subMonths(latestDate, 3);
+                    } else if (period === 'year') {
+                        startDate = df.subYears(latestDate, 1);
+                    }
+
+                    filteredData = allData.filter(row => {
+                        const rowDate = new Date(row.Date);
+                        return df.isAfter(rowDate, startDate) || df.isSameDay(rowDate, startDate);
+                    });
+                } else {
+                    // Fallback to manual date manipulation if dateFns is not available
+                    startDate = new Date(latestDate);
+                    if (period === 'month') {
+                        startDate.setMonth(latestDate.getMonth() - 1);
+                    } else if (period === '3months') {
+                        startDate.setMonth(latestDate.getMonth() - 3);
+                    } else if (period === 'year') {
+                        startDate.setFullYear(latestDate.getFullYear() - 1);
+                    }
+
+                    filteredData = allData.filter(row => new Date(row.Date) >= startDate);
+                }
+            }
+
+            createLineChart(filteredData);
         }
 
         function updateStatistics() {
@@ -473,17 +542,19 @@
         }
 
         function createCharts() {
-            createLineChart();
+            createLineChart(allData);
             createBarChart();
-            createRadarChart();
-            createRecentChart();
         }
 
-        function createLineChart() {
+        function createLineChart(chartData) {
+            if (!chartData || chartData.length === 0) return;
+
             // Prepare data for line chart
-            const dates = allData.map(row => row.Date);
-            const sums = allData.map(row => row.Sum);
-            const deltas = allData.map(row => row.Max <= 7 ? -1 : 1);
+            const dates = chartData.map(row => row.Date);
+            const sums = chartData.map(row => row.Sum);
+
+            // Cumulative Win Score Diff starting from 0 for the selected period
+            const deltas = chartData.map(row => row.Max <= 7 ? -1 : 1);
             const cumulative = deltas.reduce((acc, curr) => {
                 acc.push((acc.length ? acc[acc.length - 1] : 0) + curr);
                 return acc;
@@ -491,7 +562,7 @@
 
             // Calculate moving average (7-day)
             const movingAvg = [];
-            const windowSize = Math.min(7, allData.length);
+            const windowSize = Math.min(7, chartData.length);
 
             for (let i = 0; i < sums.length; i++) {
                 if (i < windowSize - 1) {
@@ -519,14 +590,15 @@
                     labels: dates,
                     datasets: [
                         {
-                            label: 'Sum of Scores',
+                            label: 'Cumulative Win Diff',
                             data: cumulative,
                             borderColor: 'rgba(75, 63, 114, 1)',
                             backgroundColor: 'rgba(75, 63, 114, 0.1)',
                             borderWidth: 1,
                             pointRadius: 0,
                             tension: 0.1,
-                            fill: true
+                            fill: true,
+                            yAxisID: 'yCumulative'
                         }
                     ]
                 },
@@ -534,13 +606,13 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: Math.max(0, Math.min(...cumulative) - 2),
-                            max: Math.max(...cumulative) + 2,
+                        yCumulative: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
                             title: {
                                 display: true,
-                                text: 'Sum of Scores'
+                                text: 'Cumulative Win Diff'
                             }
                         },
                         x: {
@@ -659,129 +731,6 @@
             barChart = new Chart(ctx, config);
         }
 
-        function createRadarChart() {
-            // Calculate average scores for each position
-            let totalScores = [0, 0, 0, 0];
-
-            allData.forEach(row => {
-                totalScores[0] += row["Score 1"];
-                totalScores[1] += row["Score 2"];
-                totalScores[2] += row["Score 3"];
-                totalScores[3] += row["Score 4"];
-            });
-
-            const avgScores = totalScores.map(score => allData.length > 0 ? score / allData.length : 0);
-
-            const ctx = document.getElementById('radarChart').getContext('2d');
-
-            if (radarChart) {
-                radarChart.destroy();
-            }
-
-            radarChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Word 1', 'Word 2', 'Word 3', 'Word 4'],
-                    datasets: [
-                        {
-                            label: 'Average Score',
-                            data: avgScores,
-                            backgroundColor: 'rgba(75, 63, 114, 0.2)',
-                            borderColor: 'rgba(75, 63, 114, 1)',
-                            pointBackgroundColor: 'rgba(75, 63, 114, 1)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(75, 63, 114, 1)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 10,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function createRecentChart() {
-            // Get the 10 most recent games
-            const recentData = [...allData].slice(-10);
-            const dates = recentData.map(row => row.Date);
-
-            const dataset1 = recentData.map(row => row["Max"]);
-            const dataset2 = recentData.map(row => row["Score 2"]);
-            const dataset3 = recentData.map(row => row["Score 3"]);
-            const dataset4 = recentData.map(row => row["Score 4"]);
-
-            const ctx = document.getElementById('recentChart').getContext('2d');
-
-            if (recentChart) {
-                recentChart.destroy();
-            }
-
-            recentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [
-                        {
-                            label: 'Max score',
-                            data: dataset1,
-                            borderColor: 'rgba(75, 63, 114, 1)',
-                            backgroundColor: 'transparent',
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: 5,
-                            max: 13,
-                            title: {
-                                display: true,
-                                text: 'Individual Scores'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                maxTicksLimit: 10,
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function (tooltipItems) {
-                                    const dateStr = tooltipItems[0].label;
-                                    const date = new Date(dateStr);
-                                    return isNaN(date.getTime()) ? dateStr :
-                                        date.toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        });
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
     </script>
 </body>
 
