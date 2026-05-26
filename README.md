@@ -14,7 +14,6 @@ Also strategies used
 
 1 - stare, cloud, hying
 2 - stare, doily, punch
-3
 
 
 
