@@ -34,3 +34,5 @@ pipreqs .
 3. virtualenv env (in source folder)
 4. source env/bin/activate
 5. pip install -r requirements.txt
+
+May 26 - added a dropdown to choose period of time to show win diff
