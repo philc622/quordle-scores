@@ -15,22 +15,22 @@ Also strategies used
 1 - stare, cloud, hying
 2 - stare, doily, punch
 3
-4
 
 
-Python set up 
-- to get requirements.txt file:
+
+
+Python set up
+
+* to get requirements.txt file:
 pip install pipreqs
 pipreqs .
-
-- when installing onto new WSL dist:
+* when installing onto new WSL dist:
 1. install pip
 2. pip install virtualenv
 3. virtualenv env
 4. source env/bin/activate
 5. pip install -r requirements.txt
-
-- when installing onto Raspberry Pi
+* when installing onto Raspberry Pi
 1. sudo apt install pip (as root)
 2. sudo apt install python3-virtualenv (as root)
 3. virtualenv env (in source folder)
@@ -38,3 +38,4 @@ pipreqs .
 5. pip install -r requirements.txt
 
 May 26 - added a dropdown to choose period of time to show win diff
+
