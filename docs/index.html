@@ -271,29 +271,14 @@
                     <div class="chart-header">
                         <h2>Score Trends Over Time</h2>
                         <select id="periodSelector" class="period-selector">
-                            <option value="all">All Time</option>
                             <option value="year">Last Year</option>
                             <option value="3months">Last 3 Months</option>
                             <option value="month">Last Month</option>
+                            <option value="all">All Time</option>
                         </select>
                     </div>
                     <div id="lineChartContainer">
                         <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-row">
-                <div class="chart-card">
-                    <h2>Individual Word Performance</h2>
-                    <div id="radarChartContainer">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <h2>Recent Performance</h2>
-                    <div id="recentChartContainer">
-                        <canvas id="recentChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -559,8 +544,6 @@
         function createCharts() {
             createLineChart(allData);
             createBarChart();
-            createRadarChart();
-            createRecentChart();
         }
 
         function createLineChart(chartData) {
@@ -616,16 +599,6 @@
                             tension: 0.1,
                             fill: true,
                             yAxisID: 'yCumulative'
-                        },
-                        {
-                            label: '7-Day Moving Avg (Sum)',
-                            data: movingAvg,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            tension: 0.4,
-                            yAxisID: 'ySum'
                         }
                     ]
                 },
@@ -640,18 +613,6 @@
                             title: {
                                 display: true,
                                 text: 'Cumulative Win Diff'
-                            }
-                        },
-                        ySum: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: {
-                                drawOnChartArea: false // only want the grid lines for one axis
-                            },
-                            title: {
-                                display: true,
-                                text: 'Sum of Scores (Avg)'
                             }
                         },
                         x: {
@@ -770,129 +731,6 @@
             barChart = new Chart(ctx, config);
         }
 
-        function createRadarChart() {
-            // Calculate average scores for each position
-            let totalScores = [0, 0, 0, 0];
-
-            allData.forEach(row => {
-                totalScores[0] += row["Score 1"];
-                totalScores[1] += row["Score 2"];
-                totalScores[2] += row["Score 3"];
-                totalScores[3] += row["Score 4"];
-            });
-
-            const avgScores = totalScores.map(score => allData.length > 0 ? score / allData.length : 0);
-
-            const ctx = document.getElementById('radarChart').getContext('2d');
-
-            if (radarChart) {
-                radarChart.destroy();
-            }
-
-            radarChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Word 1', 'Word 2', 'Word 3', 'Word 4'],
-                    datasets: [
-                        {
-                            label: 'Average Score',
-                            data: avgScores,
-                            backgroundColor: 'rgba(75, 63, 114, 0.2)',
-                            borderColor: 'rgba(75, 63, 114, 1)',
-                            pointBackgroundColor: 'rgba(75, 63, 114, 1)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(75, 63, 114, 1)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 10,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function createRecentChart() {
-            // Get the 10 most recent games
-            const recentData = [...allData].slice(-10);
-            const dates = recentData.map(row => row.Date);
-
-            const dataset1 = recentData.map(row => row["Max"]);
-            const dataset2 = recentData.map(row => row["Score 2"]);
-            const dataset3 = recentData.map(row => row["Score 3"]);
-            const dataset4 = recentData.map(row => row["Score 4"]);
-
-            const ctx = document.getElementById('recentChart').getContext('2d');
-
-            if (recentChart) {
-                recentChart.destroy();
-            }
-
-            recentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [
-                        {
-                            label: 'Max score',
-                            data: dataset1,
-                            borderColor: 'rgba(75, 63, 114, 1)',
-                            backgroundColor: 'transparent',
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: 5,
-                            max: 13,
-                            title: {
-                                display: true,
-                                text: 'Individual Scores'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                maxTicksLimit: 10,
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function (tooltipItems) {
-                                    const dateStr = tooltipItems[0].label;
-                                    const date = new Date(dateStr);
-                                    return isNaN(date.getTime()) ? dateStr :
-                                        date.toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        });
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
     </script>
 </body>
 
