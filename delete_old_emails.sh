@@ -8,6 +8,6 @@ source ~/.env
 
 source ~/quordle-scores/env/bin/activate
 
-python ~/scripts/delete_old_quordle_emails.py --dry-run False --days 30
+python ~/scripts/delete_old_quordle_emails.py --no-dry-run --days 30
 
 echo "Done!"
