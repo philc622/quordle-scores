@@ -31,7 +31,7 @@ echo "Copying Bash scripts..."
 cp quordle-scores/*.sh $SCRIPTS_FOLDER
 
 # echo "Copying html file"
-# cp quordle-scores/quordle_dashboard.html /var/www/html/quordle/index.html 
+cp quordle-scores/quordle_dashboard.html /home/phil/nginx-pi/html/index.html 
 
 # Count copied files
 COPIED_COUNT=$(find "$SCRIPTS_FOLDER" -name "*.py" | wc -l)
